@@ -33,6 +33,25 @@ export const posts = createTable(
   ],
 );
 
+export const todos = createTable(
+  "todo",
+  (d) => ({
+    id: d.integer({ mode: "number" }).primaryKey({ autoIncrement: true }),
+    text: d.text({ length: 256 }).notNull(),
+    completed: d.integer({ mode: "boolean" }).default(false).notNull(),
+    createdById: d
+      .text({ length: 255 })
+      .notNull()
+      .references(() => users.id),
+    createdAt: d
+      .integer({ mode: "timestamp" })
+      .default(sql`(unixepoch())`)
+      .notNull(),
+    updatedAt: d.integer({ mode: "timestamp" }).$onUpdate(() => new Date()),
+  }),
+  (t) => [index("todo_created_by_idx").on(t.createdById)],
+);
+
 export const users = createTable("user", (d) => ({
   id: d
     .text({ length: 255 })
@@ -47,6 +66,7 @@ export const users = createTable("user", (d) => ({
 
 export const usersRelations = relations(users, ({ many }) => ({
   accounts: many(accounts),
+  todos: many(todos),
 }));
 
 export const accounts = createTable(

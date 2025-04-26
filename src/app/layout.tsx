@@ -1,9 +1,16 @@
 import "~/styles/globals.css";
 
 import { type Metadata } from "next";
-import { Geist } from "next/font/google";
-
+// import { Geist } from "next/font/google"; // Assuming Geist font might be used, uncomment if needed
 import { TRPCReactProvider } from "~/trpc/react";
+import { ThemeToggle } from "./_components/theme-toggle";
+import { ThemeProvider } from "next-themes"; // Import ThemeProvider from next-themes
+
+// You might uncomment and configure your font here if you're using one
+// const inter = Geist({
+//   subsets: ["latin"],
+//   variable: "--font-geist-sans",
+// });
 
 export const metadata: Metadata = {
   title: "Create T3 App",
@@ -11,18 +18,35 @@ export const metadata: Metadata = {
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
 
-const geist = Geist({
-  subsets: ["latin"],
-  variable: "--font-geist-sans",
-});
-
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${geist.variable}`}>
+    // Add suppressHydrationWarning to the html tag.
+    // This is necessary when using libraries that modify the html element attributes
+    // client-side, like next-themes, to prevent hydration mismatches.
+    <html lang="en" suppressHydrationWarning>
       <body>
-        <TRPCReactProvider>{children}</TRPCReactProvider>
+        {/*
+          Wrap your main application content with the ThemeProvider.
+          This context provides the theme state to components and applies
+          the necessary class (e.g., 'dark') to the html element.
+
+          - attribute="class": Tells next-themes to add the theme as a class (e.g., <html class="dark">).
+          - defaultTheme="system": Sets the initial theme based on the user's system preference.
+          - enableSystem: Allows the "system" theme option to be selected via ThemeToggle.
+          - disableTransitionOnChange: (Optional) Prevents CSS transitions during theme changes.
+        */}
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          {/* Keep the ThemeToggle component inside the ThemeProvider */}
+          <ThemeToggle />
+          <TRPCReactProvider>{children}</TRPCReactProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
